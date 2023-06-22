@@ -16,7 +16,7 @@ Canerias = range(1, 10) # Definar la forma en la que seccionan las cañerias
 
 # Parámetros
 C = {(i): uniform(350, 550) for i in E} # Costo diario de arreglar la caneria
-L = {(i,j): randint(1, 3) for i in E for j in Canerias} # tiempo de demora de reparacion de caneria por empresa
+L = {(i,j): randint(0, 3) for i in E for j in Canerias} # tiempo de demora de reparacion de caneria por empresa
 P = {(j): uniform(3000, 4000) for j in Canerias} # Miles de litros perdidos por dia
 Q = 10000000000000000
 G = {(j): uniform(100, 500) for j in Canerias} # Costo diario de mantener el agua cortada
@@ -65,7 +65,7 @@ model.addConstrs((W[j] == F[j]*(U[j]-H[j])+(1-F[j])*(365-H[j]) for j in Canerias
 model.addConstrs((quicksum(Z[j,i,t] * t for t in T for i in E) == U[j] for j in Canerias),name="R10")
 
 # La cañeria j no puede estar rota por más de gamma dias
-# model.addConstrs((W[j] <= gamma for j in Canerias),name="R11")
+model.addConstrs((W[j] <= gamma for j in Canerias),name="R11")
 
 # Una caneria no se puede empezar a reparar antes de que se rompa
 model.addConstrs((Z[j,i,t]*t + (1 - Z[j,i,t])*365 >= H[j] for j in Canerias for i in E for t in T), name="R12")

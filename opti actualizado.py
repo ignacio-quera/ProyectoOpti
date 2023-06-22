@@ -5,12 +5,12 @@ import csv
 seed(10)
 # Generar el modelo
 model = Model()
-# model.setParam("TimeLimit", 1800)
+model.setParam("TimeLimit", 1800)
 
 # Sets
 T = range(1, 366)
-E = range(5) 
-Canerias = range(1, 10) # Definar la forma en la que seccionan las cañerias  
+E = range(2) 
+Canerias = range(1, 200) # Definar la forma en la que seccionan las cañerias  
 
 # Dinero se encuentra miles de pesos
 
@@ -41,7 +41,7 @@ model.addConstr((Q >= quicksum(R[j,i,t]*(C[i] + G[j]) for t in T for i in E for 
 model.addConstrs((1 >= quicksum(R[j,i,t] for j in Canerias) for i in E for t in T),name="R2")
 
 # Una cañeria se repara sin interrupciones y en el tiempo exacto desde el día en que se decide comenzar a repararla
-model.addConstrs((L[i,j]*Z[j,i,t] == quicksum(R[j,i, alpha] for alpha in range(t, t+L[i,j]) if (t+L[i,j] <= 365)) for i in E for j in Canerias for t in T), name="R3")
+model.addConstrs((L[i,j]*Z[j,i,t] <= quicksum(R[j,i, alpha] for alpha in range(t, t+L[i,j]) if (t+L[i,j] <= 365)) for i in E for j in Canerias for t in T), name="R3")
 
 # Una cañería no puede estar siendo reparada por más de una empresa al mismo tiempo
 model.addConstrs((1 >= quicksum(R[j,i,t] for i in E) for j in Canerias for t in T ),name="R4") 
@@ -75,7 +75,7 @@ model.addConstrs((F[j]*(U[j]-H[j]) >= 0 for j in Canerias))
 # Funcion Objetivo y optimizar el problema
 objetivo = quicksum(W[j]*P[j] for j in Canerias)
 model.update()
-model.setObjective(objetivo, GRB.MINIMIZE) 
+model.setObjective(objetivo, GRB.MINIMIZE)
 
 print(sorted(((t,j) for j,t in H.items())))
 model.optimize()
@@ -83,10 +83,10 @@ model.optimize()
 
 # Manejo Soluciones
 # print("\n"+"-"*10+" Manejo Soluciones "+"-"*10)
+model.printAttr('X')
+print(H)
 print(f"El valor objetivo es de: {model.ObjVal}")
 varInfo = [(v.varName, v.X) for v in model.getVars() if v.X > 0]
 with open('testout.csv', 'w') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     wr.writerows(varInfo)
-model.printAttr('X')
-print(H)

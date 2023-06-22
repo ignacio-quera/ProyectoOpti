@@ -9,8 +9,8 @@ model.setParam("TimeLimit", 1800)
 
 # Sets
 T = range(1, 366)
-E = range(2) 
-Canerias = range(1, 200) # Definar la forma en la que seccionan las cañerias  
+E = range(29) 
+Canerias = range(1, 1000) # Definar la forma en la que seccionan las cañerias  
 
 # Dinero se encuentra miles de pesos
 
@@ -18,7 +18,7 @@ Canerias = range(1, 200) # Definar la forma en la que seccionan las cañerias
 C = {(i): uniform(350, 550) for i in E} # Costo diario de arreglar la caneria
 L = {(i,j): randint(0, 3) for i in E for j in Canerias} # tiempo de demora de reparacion de caneria por empresa
 P = {(j): uniform(3000, 4000) for j in Canerias} # Miles de litros perdidos por dia
-Q = 10000000000000000
+Q = 1000000
 G = {(j): uniform(100, 500) for j in Canerias} # Costo diario de mantener el agua cortada
 H = {(j): randint(1, 365) for j in Canerias}
 gamma = 90

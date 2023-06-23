@@ -1,6 +1,7 @@
 from gurobipy import GRB, Model, quicksum
-from random import randint, seed, uniform
+from random import seed
 import csv
+import datos
 
 seed(10)
 # Generar el modelo
@@ -8,20 +9,18 @@ model = Model()
 model.setParam("TimeLimit", 1800)
 
 # Sets
-T = range(1, 366)
-E = range(29) 
-Canerias = range(1, 1000) # Definar la forma en la que seccionan las cañerias  
-
-# Dinero se encuentra miles de pesos
+T = datos.dias
+E = datos.empresas
+Canerias = datos.canerias
 
 # Parámetros
-C = {(i): uniform(350, 550) for i in E} # Costo diario de arreglar la caneria
-L = {(i,j): randint(0, 3) for i in E for j in Canerias} # tiempo de demora de reparacion de caneria por empresa
-P = {(j): uniform(3000, 4000) for j in Canerias} # Miles de litros perdidos por dia
-Q = 1000000
-G = {(j): uniform(100, 500) for j in Canerias} # Costo diario de mantener el agua cortada
-H = {(j): randint(1, 365) for j in Canerias}
-gamma = 90
+C = datos.coste_diario_arreglo
+L = datos.tiempo_demora_empresa
+P = datos.litros_perdidos_por_caneria 
+Q = datos.presupuesto_anual
+G = datos.costos_corte_agua 
+H = datos.dia_caneria_rota
+gamma = datos.dias_max
 
 # Se instancian variables de decision
 U = model.addVars(Canerias, vtype = GRB.INTEGER, name = "U_j")
@@ -70,23 +69,18 @@ model.addConstrs((W[j] <= gamma for j in Canerias),name="R11")
 # Una caneria no se puede empezar a reparar antes de que se rompa
 model.addConstrs((Z[j,i,t]*t + (1 - Z[j,i,t])*365 >= H[j] for j in Canerias for i in E for t in T), name="R12")
 
-model.addConstrs((F[j]*(U[j]-H[j]) >= 0 for j in Canerias))
-
 # Funcion Objetivo y optimizar el problema
 objetivo = quicksum(W[j]*P[j] for j in Canerias)
 model.update()
 model.setObjective(objetivo, GRB.MINIMIZE)
 
-print(sorted(((t,j) for j,t in H.items())))
 model.optimize()
-
 
 # Manejo Soluciones
 # print("\n"+"-"*10+" Manejo Soluciones "+"-"*10)
-model.printAttr('X')
-print(H)
 print(f"El valor objetivo es de: {model.ObjVal}")
 varInfo = [(v.varName, v.X) for v in model.getVars() if v.X > 0]
-with open('testout.csv', 'w') as myfile:
+with open('resultados.csv', 'w') as myfile:
+    myfile.write(f"El valor objetivo es de: {model.ObjVal}\n")
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     wr.writerows(varInfo)

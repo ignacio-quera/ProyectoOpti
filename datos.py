@@ -4,10 +4,10 @@ seed(10)
 dias = range(1,366)
 
 # Cantidad de empresas que se dedican a la reparacion de cañerías en Santiago
-empresas = range(1, 10)
+empresas = range(1, 4)
 
 # Cantidad de cañerías en mal estado durante un año en Santiago
-canerias = range(1, 400)
+canerias = range(1, 296)
 
 # Costo diario de arreglar la caneria
 coste_diario_arreglo = {(i): uniform(350, 550) for i in empresas} 
